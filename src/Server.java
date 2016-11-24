@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Server
 {
@@ -47,7 +48,8 @@ public class Server
                 LinkedTreeMap<String, String[]> map = gson.fromJson( message.toString(), type );
                 List<String> cmds = Arrays.asList( map.get( "script" ) );
                 Interpreter i = new Interpreter();
-                cmds.forEach( cmd -> i.run( cmd.split( " " )[ 0 ], i.NO_ARGS ) );
+                List<Command> commands = cmds.stream().map(x -> new Command( x )).collect( Collectors.toList());
+                commands.forEach( cmd -> i.run( cmd ) );
                 server.close();
             } catch ( IOException ioException ) {
                 server.close();

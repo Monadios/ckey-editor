@@ -11,7 +11,6 @@ public class Interpreter
 {
     private Script script;
     private GroovyShell shell;
-    public static final String[] NO_ARGS = {};
 
     public Interpreter()
     {
@@ -24,11 +23,8 @@ public class Interpreter
         }
     }
 
-    public void run( String cmd, String[] args )
+    public void run( Command cmd )
     {
-        if ( args == null ) {
-            args = NO_ARGS;
-        }
-        script.invokeMethod( cmd, args );
+        script.invokeMethod( cmd.getCommandName(), cmd.getArgs() );
     }
 }
