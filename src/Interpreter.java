@@ -16,7 +16,7 @@ public class Interpreter
     public Interpreter()
     {
         shell = new GroovyShell();
-        File p = new File( "/home/gustav/IdeaProjects/SmartKey/src/Scripting.groovy" );
+        File p = new File( "src/Scripting.groovy" );
         try {
             script = shell.parse( p );
         } catch ( IOException e ) {
