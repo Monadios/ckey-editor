@@ -4,6 +4,11 @@ import java.util.Arrays;
 /**
  * Created by gustav on 11/24/16.
  */
+
+/*
+* Perhaps this class should extend a hashmap?
+* */
+
 public class Command
 {
      private String commandName;

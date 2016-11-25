@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Server
@@ -18,7 +19,7 @@ public class Server
     private ServerSocket server;
     private Socket connection = null;
     private BufferedReader in;
-    private Object message;
+    public String result;
     private int port;
 
     Server( int pn )
@@ -28,34 +29,57 @@ public class Server
 
     public void run()
     {
-        //1. creating a server socket
+        Optional<String> recMsg = readMsg();
+        // TODO: Replace this entire code block with write- and readObject functions
+        Gson gson = new Gson();
+        Type type = new TypeToken<Map<String, String[]>>()
+        {
+        }.getType();
+        LinkedTreeMap<String, String[]> map = new LinkedTreeMap<>();
+
+        if(recMsg.isPresent()) {
+            map = gson.fromJson( recMsg.get(), type );
+        }else{
+            //?
+        }
+
+        List<String> cmds = Arrays.asList( map.get( "script" ) );
+        result = String.join( " ", cmds );
+        Interpreter i = new Interpreter();
+        List<Command> commands = cmds.stream().map( x -> new Command( x ) ).collect( Collectors.toList() );
+        commands.forEach( cmd -> i.run( cmd ) );
+
+        try {
+            server.close();
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+    }
+
+    private Optional<String> readMsg()
+    {
+        Optional<String> msg = Optional.empty();
+        String message;
         try {
             server = new ServerSocket( port );
-            //2. Wait for connection
             System.out.println( "Waiting for connection" );
             connection = server.accept();
             System.out.println( "Connection received from " + connection.getInetAddress().getHostName() );
-            //3. get Input and Output streams
             in = new BufferedReader( new InputStreamReader( connection.getInputStream() ) );
-            //4. The two parts communicate via the input and output streams
-
-            try {
-                message = in.readLine();
-                Gson gson = new Gson();
-                Type type = new TypeToken<Map<String, String[]>>()
-                {
-                }.getType();
-                LinkedTreeMap<String, String[]> map = gson.fromJson( message.toString(), type );
-                List<String> cmds = Arrays.asList( map.get( "script" ) );
-                Interpreter i = new Interpreter();
-                List<Command> commands = cmds.stream().map(x -> new Command( x )).collect( Collectors.toList());
-                commands.forEach( cmd -> i.run( cmd ) );
-                server.close();
-            } catch ( IOException ioException ) {
-                server.close();
-            }
+            message = in.readLine();
+            msg = Optional.of(message);
         } catch ( IOException e ) {
             e.printStackTrace();
+        }finally {
+            return msg;
+        }
+    }
+
+    private class NoMessageReceivedException extends Exception
+    {
+        public NoMessageReceivedException(String msg)
+        {
+            super(msg);
         }
     }
 }

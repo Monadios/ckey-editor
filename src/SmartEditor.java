@@ -24,6 +24,7 @@ public class SmartEditor extends Application
         scene.setFill( c );
 
         server.run();
+        System.out.println(server.result);
 
 
         System.out.println( "Out of server" );
